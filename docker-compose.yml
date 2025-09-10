@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  spicy-todo-api:
+    build:
+      context: ./api/pyfast-api
+      dockerfile: Dockerfile
+    container_name: spicy-todo-api
+    ports:
+      - "8000:8000"
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_RELOAD=false
+    volumes:
+      - ./api/pyfast-api:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - spicy-todo-network
+
+  # Frontend Service
+  spicy-todo-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: spicy-todo-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      spicy-todo-api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - spicy-todo-network
+
+networks:
+  spicy-todo-network:
+    driver: bridge
+

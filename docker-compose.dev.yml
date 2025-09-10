@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Backend API Service (Development)
+  spicy-todo-api:
+    build:
+      context: ./api/pyfast-api
+      dockerfile: Dockerfile
+    container_name: spicy-todo-api-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_RELOAD=true
+    volumes:
+      - ./api/pyfast-api:/app
+      - /app/venv
+      - /app/__pycache__
+    restart: unless-stopped
+    networks:
+      - spicy-todo-network
+
+  # Frontend Service (Development with hot reload)
+  spicy-todo-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: spicy-todo-frontend-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - spicy-todo-api
+    restart: unless-stopped
+    networks:
+      - spicy-todo-network
+
+networks:
+  spicy-todo-network:
+    driver: bridge
+
