@@ -15,12 +15,53 @@ A FastAPI backend service for the Spicy Todo application, providing RESTful endp
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: Docker (Recommended - No Python Installation Required)
 
+**Prerequisites:**
+- Docker and Docker Compose installed
+- No Python installation needed!
+
+**Steps:**
+
+1. Navigate to the API directory:
+   ```bash
+   cd api/pyfast-api
+   ```
+
+2. **Windows Users**: Run the batch file:
+   ```cmd
+   start-docker.bat
+   ```
+
+   **Linux/Mac Users**: Run the shell script:
+   ```bash
+   ./start-docker.sh
+   ```
+
+   **Manual Docker Commands**:
+   ```bash
+   # Build and start the container
+   docker-compose up --build -d
+   
+   # View logs
+   docker-compose logs -f
+   
+   # Stop the container
+   docker-compose down
+   ```
+
+3. Access the API:
+   - **API Base URL**: http://localhost:8000
+   - **Interactive Docs**: http://localhost:8000/docs
+   - **ReDoc**: http://localhost:8000/redoc
+
+### Option 2: Local Python Installation
+
+**Prerequisites:**
 - Python 3.8 or higher
 - pip (Python package manager)
 
-### Installation
+**Steps:**
 
 1. Navigate to the API directory:
    ```bash
@@ -170,6 +211,12 @@ api/pyfast-api/
 ├── database.py          # Data storage and operations
 ├── requirements.txt     # Python dependencies
 ├── env.example         # Environment variables template
+├── Dockerfile          # Docker configuration
+├── docker-compose.yml  # Docker Compose for production
+├── docker-compose.dev.yml # Docker Compose for development
+├── .dockerignore       # Docker ignore file
+├── start-docker.sh     # Linux/Mac Docker startup script
+├── start-docker.bat    # Windows Docker startup script
 └── README.md           # This file
 ```
 
@@ -182,6 +229,47 @@ The API is designed to work seamlessly with the React frontend:
 3. **Error Handling**: Proper HTTP status codes for frontend error handling
 4. **Filtering**: Query parameters match the frontend's filtering needs
 
+## 🐳 Docker Deployment
+
+### Production Docker Setup
+
+The API includes comprehensive Docker support for easy deployment:
+
+**Files:**
+- `Dockerfile`: Multi-stage build with security best practices
+- `docker-compose.yml`: Production-ready container orchestration
+- `docker-compose.dev.yml`: Development setup with hot reload
+- `.dockerignore`: Optimized build context
+
+**Features:**
+- ✅ **No Python Required**: Runs without local Python installation
+- ✅ **Security**: Non-root user, minimal attack surface
+- ✅ **Health Checks**: Built-in container health monitoring
+- ✅ **Optimized**: Multi-layer caching for faster builds
+- ✅ **Cross-Platform**: Works on Windows, Mac, and Linux
+
+**Quick Commands:**
+```bash
+# Production deployment
+docker-compose up --build -d
+
+# Development with hot reload
+docker-compose -f docker-compose.dev.yml up --build
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Docker Environment Variables
+
+The Docker setup supports the same environment variables as the local installation:
+- `API_HOST`: Server host (default: 0.0.0.0)
+- `API_PORT`: Server port (default: 8000)
+- `API_RELOAD`: Enable auto-reload (default: false in production)
+
 ## 🚀 Production Deployment
 
 For production deployment, consider:
@@ -192,6 +280,7 @@ For production deployment, consider:
 4. **Logging**: Add comprehensive logging
 5. **Monitoring**: Add health checks and monitoring
 6. **Environment**: Use environment-specific configurations
+7. **Docker**: Use the provided Docker setup for consistent deployment
 
 ## 📊 Sample Data
 
