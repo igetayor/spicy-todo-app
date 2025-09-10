@@ -15,7 +15,12 @@ app = FastAPI(
 # CORS middleware for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "http://spicy-todo-frontend:3000",  # Docker container name
+        "http://spicy-todo-frontend-dev:3000"  # Development container name
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -3,61 +3,113 @@ import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
 import TodoFilter from './components/TodoFilter';
 import TodoStats from './components/TodoStats';
-import { sampleTodos } from './data/sampleData';
+import apiService from './services/api';
 import './App.css';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Load sample data on component mount
+  // Load todos from API on component mount
   useEffect(() => {
-    setTodos(sampleTodos);
+    loadTodos();
   }, []);
 
-  // Filter todos based on current filter and search term
-  const filteredTodos = todos.filter(todo => {
-    const matchesFilter = filter === 'all' || 
-                         (filter === 'active' && !todo.completed) ||
-                         (filter === 'completed' && todo.completed);
-    
-    const matchesSearch = todo.text.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesFilter && matchesSearch;
-  });
+  // Load todos when filter or search changes
+  useEffect(() => {
+    loadTodos();
+  }, [filter, searchTerm]);
+
+  const loadTodos = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiService.getTodos(filter, searchTerm);
+      setTodos(data);
+    } catch (err) {
+      setError('Failed to load todos. Please check if the API is running.');
+      console.error('Error loading todos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // CRUD Operations
-  const addTodo = (text, priority = 'medium') => {
-    const newTodo = {
-      id: Date.now(),
-      text,
-      completed: false,
-      priority,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    setTodos([newTodo, ...todos]);
+  const addTodo = async (text, priority = 'medium') => {
+    try {
+      setLoading(true);
+      setError(null);
+      const newTodo = await apiService.createTodo({ text, priority });
+      setTodos([newTodo, ...todos]);
+    } catch (err) {
+      setError('Failed to create todo');
+      console.error('Error creating todo:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateTodo = (id, updates) => {
-    setTodos(todos.map(todo => 
-      todo.id === id 
-        ? { ...todo, ...updates, updatedAt: new Date().toISOString() }
-        : todo
-    ));
+  const updateTodo = async (id, updates) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const updatedTodo = await apiService.updateTodo(id, updates);
+      setTodos(todos.map(todo => 
+        todo.id === id ? updatedTodo : todo
+      ));
+    } catch (err) {
+      setError('Failed to update todo');
+      console.error('Error updating todo:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+  const deleteTodo = async (id) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await apiService.deleteTodo(id);
+      setTodos(todos.filter(todo => todo.id !== id));
+    } catch (err) {
+      setError('Failed to delete todo');
+      console.error('Error deleting todo:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleTodo = (id) => {
-    updateTodo(id, { completed: !todos.find(todo => todo.id === id).completed });
+  const toggleTodo = async (id) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const updatedTodo = await apiService.toggleTodo(id);
+      setTodos(todos.map(todo => 
+        todo.id === id ? updatedTodo : todo
+      ));
+    } catch (err) {
+      setError('Failed to toggle todo');
+      console.error('Error toggling todo:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const clearCompleted = () => {
-    setTodos(todos.filter(todo => !todo.completed));
+  const clearCompleted = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      await apiService.clearCompletedTodos();
+      setTodos(todos.filter(todo => !todo.completed));
+    } catch (err) {
+      setError('Failed to clear completed todos');
+      console.error('Error clearing completed todos:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,7 +123,16 @@ function App() {
         </header>
 
         <div className="app-content">
-          <TodoForm onAddTodo={addTodo} />
+          {error && (
+            <div className="error-message">
+              <p>⚠️ {error}</p>
+              <button onClick={loadTodos} className="retry-button">
+                Retry
+              </button>
+            </div>
+          )}
+
+          <TodoForm onAddTodo={addTodo} loading={loading} />
           
           <TodoFilter 
             filter={filter}
@@ -80,15 +141,17 @@ function App() {
             onSearchChange={setSearchTerm}
             onClearCompleted={clearCompleted}
             completedCount={todos.filter(todo => todo.completed).length}
+            loading={loading}
           />
 
-          <TodoStats todos={todos} />
+          <TodoStats todos={todos} loading={loading} />
 
           <TodoList 
-            todos={filteredTodos}
+            todos={todos}
             onToggleTodo={toggleTodo}
             onUpdateTodo={updateTodo}
             onDeleteTodo={deleteTodo}
+            loading={loading}
           />
         </div>
       </div>
