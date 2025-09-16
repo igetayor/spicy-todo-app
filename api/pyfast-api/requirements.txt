@@ -6,6 +6,10 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
 
+# Logging dependencies
+structlog==23.2.0
+colorama==0.4.6
+
 # Testing dependencies
 pytest==7.4.3
 pytest-asyncio==0.21.1

@@ -4,6 +4,7 @@ import TodoForm from './components/TodoForm';
 import TodoFilter from './components/TodoFilter';
 import TodoStats from './components/TodoStats';
 import apiService from './services/api';
+import { logger, userLogger, componentLogger } from './utils/logger';
 import './App.css';
 
 function App() {
@@ -12,6 +13,12 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Log component mount
+  useEffect(() => {
+    componentLogger.logComponentLifecycle('App', 'mounted');
+    logger.info('SpicyTodo app initialized');
+  }, []);
 
   // Load todos from API on component mount
   useEffect(() => {
@@ -27,11 +34,24 @@ function App() {
     try {
       setLoading(true);
       setError(null);
+      
+      logger.debug('Loading todos', { filter, searchTerm });
       const data = await apiService.getTodos(filter, searchTerm);
       setTodos(data);
+      
+      logger.info('Todos loaded successfully', { 
+        count: data.length, 
+        filter, 
+        searchTerm 
+      });
     } catch (err) {
-      setError('Failed to load todos. Please check if the API is running.');
-      console.error('Error loading todos:', err);
+      const errorMsg = 'Failed to load todos. Please check if the API is running.';
+      setError(errorMsg);
+      logger.error('Error loading todos', { 
+        error: err.message, 
+        filter, 
+        searchTerm 
+      });
     } finally {
       setLoading(false);
     }
@@ -42,11 +62,23 @@ function App() {
     try {
       setLoading(true);
       setError(null);
+      
+      userLogger.logUserAction('create_todo', { text, priority });
       const newTodo = await apiService.createTodo({ text, priority });
       setTodos([newTodo, ...todos]);
+      
+      logger.info('Todo created successfully', { 
+        id: newTodo.id, 
+        text, 
+        priority 
+      });
     } catch (err) {
       setError('Failed to create todo');
-      console.error('Error creating todo:', err);
+      logger.error('Error creating todo', { 
+        error: err.message, 
+        text, 
+        priority 
+      });
     } finally {
       setLoading(false);
     }
