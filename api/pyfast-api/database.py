@@ -1,7 +1,11 @@
 from typing import List, Optional
 from datetime import datetime
 import uuid
+import structlog
 from models import Todo, TodoCreate, TodoUpdate, Priority
+
+# Initialize logger
+logger = structlog.get_logger("database")
 
 # In-memory storage for demo purposes
 # In production, this would be replaced with a real database
@@ -18,6 +22,8 @@ def _get_current_timestamp() -> datetime:
 def initialize_sample_data():
     """Initialize the database with sample data"""
     global _todos_db
+    
+    logger.info("Initializing database with sample data")
     
     sample_todos = [
         {
@@ -89,6 +95,8 @@ def initialize_sample_data():
             updated_at=todo_data["updated_at"]
         )
         _todos_db.append(todo)
+    
+    logger.info("Database initialized successfully", sample_count=len(_todos_db))
 
 def get_todos() -> List[Todo]:
     """Get all todos"""
@@ -111,6 +119,13 @@ def create_todo(todo_data: TodoCreate) -> Todo:
     if not _todos_db:
         initialize_sample_data()
     
+    logger.debug(
+        "Creating new todo",
+        text=todo_data.text,
+        priority=todo_data.priority,
+        completed=todo_data.completed
+    )
+    
     new_todo = Todo(
         id=_generate_id(),
         text=todo_data.text,
@@ -121,6 +136,15 @@ def create_todo(todo_data: TodoCreate) -> Todo:
     )
     
     _todos_db.append(new_todo)
+    
+    logger.info(
+        "Todo created successfully",
+        todo_id=new_todo.id,
+        text=new_todo.text,
+        priority=new_todo.priority,
+        total_todos=len(_todos_db)
+    )
+    
     return new_todo
 
 def update_todo(todo_id: str, todo_data: TodoUpdate) -> Todo:
