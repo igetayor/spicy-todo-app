@@ -13,8 +13,14 @@ services:
       - API_HOST=0.0.0.0
       - API_PORT=8000
       - API_RELOAD=false
+      - LOG_LEVEL=INFO
+      - LOG_DIR=/app/logs
+      - LOG_CONSOLE=true
+      - LOG_FILE=true
+      - LOG_JSON=false
     volumes:
       - ./api/pyfast-api:/app
+      - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]

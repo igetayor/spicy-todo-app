@@ -3,14 +3,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from datetime import datetime
 import uuid
+import structlog
 from models import Todo, TodoCreate, TodoUpdate, TodoResponse
 from database import get_todos, create_todo, update_todo, delete_todo, get_todo_by_id
+from logging_config import get_logger, log_database_operation, log_business_logic
+from middleware import LoggingMiddleware, ErrorHandlingMiddleware
+
+# Initialize logger
+logger = get_logger(__name__)
 
 app = FastAPI(
     title="Spicy Todo API",
     description="A spicy FastAPI backend for the todo application",
     version="1.0.0"
 )
+
+# Add middleware (order matters - first added is outermost)
+app.add_middleware(ErrorHandlingMiddleware)
+app.add_middleware(LoggingMiddleware)
 
 # CORS middleware for frontend integration
 app.add_middleware(
@@ -26,12 +36,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Log application startup
+logger.info("SpicyTodo API starting up", version="1.0.0")
+
 @app.get("/")
 async def root():
+    logger.info("Root endpoint accessed")
     return {"message": "🌶️ Welcome to Spicy Todo API!", "version": "1.0.0"}
 
 @app.get("/health")
 async def health_check():
+    logger.debug("Health check endpoint accessed")
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 @app.get("/api/todos", response_model=List[TodoResponse])
@@ -44,7 +59,15 @@ async def get_todos_endpoint(
     Get all todos with optional filtering and search
     """
     try:
+        logger.info(
+            "Getting todos",
+            filter=filter,
+            search=search,
+            priority=priority
+        )
+        
         todos = get_todos()
+        log_database_operation(logger, "READ", "todos", success=True, count=len(todos))
         
         # Apply filters
         if filter == "active":
@@ -61,8 +84,24 @@ async def get_todos_endpoint(
         if priority:
             todos = [todo for todo in todos if todo.priority == priority]
         
+        logger.info(
+            "Todos retrieved successfully",
+            total_count=len(todos),
+            filter_applied=filter,
+            search_applied=bool(search),
+            priority_applied=priority
+        )
+        
         return todos
     except Exception as e:
+        logger.error(
+            "Error fetching todos",
+            error=str(e),
+            error_type=type(e).__name__,
+            filter=filter,
+            search=search,
+            priority=priority
+        )
         raise HTTPException(status_code=500, detail=f"Error fetching todos: {str(e)}")
 
 @app.get("/api/todos/{todo_id}", response_model=TodoResponse)
@@ -86,9 +125,40 @@ async def create_todo_endpoint(todo_data: TodoCreate):
     Create a new todo
     """
     try:
+        logger.info(
+            "Creating new todo",
+            text=todo_data.text,
+            priority=todo_data.priority,
+            completed=todo_data.completed
+        )
+        
         new_todo = create_todo(todo_data)
+        log_database_operation(logger, "CREATE", "todos", record_id=new_todo.id, success=True)
+        
+        log_business_logic(
+            logger,
+            "Todo created",
+            user_action="create_todo",
+            data_changed=True,
+            todo_id=new_todo.id,
+            priority=new_todo.priority
+        )
+        
+        logger.info(
+            "Todo created successfully",
+            todo_id=new_todo.id,
+            text=new_todo.text,
+            priority=new_todo.priority
+        )
+        
         return new_todo
     except Exception as e:
+        logger.error(
+            "Error creating todo",
+            error=str(e),
+            error_type=type(e).__name__,
+            todo_data=todo_data.dict()
+        )
         raise HTTPException(status_code=500, detail=f"Error creating todo: {str(e)}")
 
 @app.put("/api/todos/{todo_id}", response_model=TodoResponse)

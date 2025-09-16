@@ -1,4 +1,6 @@
 // API service for communicating with the backend
+import { apiLogger } from '../utils/logger';
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 class ApiService {
@@ -8,6 +10,9 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
+    const method = options.method || 'GET';
+    const startTime = performance.now();
+    
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -16,16 +21,44 @@ class ApiService {
       ...options,
     };
 
+    apiLogger.debug(`API request started: ${method} ${endpoint}`, {
+      method,
+      endpoint,
+      url,
+      headers: config.headers
+    });
+
     try {
       const response = await fetch(url, config);
+      const duration = performance.now() - startTime;
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        apiLogger.logApiRequest(method, endpoint, response.status, duration, error);
+        throw error;
       }
       
-      return await response.json();
+      const data = await response.json();
+      apiLogger.logApiRequest(method, endpoint, response.status, duration);
+      
+      apiLogger.debug(`API request completed: ${method} ${endpoint}`, {
+        method,
+        endpoint,
+        status: response.status,
+        duration: `${duration.toFixed(2)}ms`,
+        dataSize: JSON.stringify(data).length
+      });
+      
+      return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      const duration = performance.now() - startTime;
+      apiLogger.logApiRequest(method, endpoint, 0, duration, error);
+      apiLogger.error(`API request failed: ${method} ${endpoint}`, {
+        method,
+        endpoint,
+        error: error.message,
+        duration: `${duration.toFixed(2)}ms`
+      });
       throw error;
     }
   }
