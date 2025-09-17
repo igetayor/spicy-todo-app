@@ -18,6 +18,7 @@ services:
       - LOG_CONSOLE=true
       - LOG_FILE=true
       - LOG_JSON=false
+      - DATABASE_URL=sqlite:///./data/app.db
     volumes:
       - ./api/pyfast-api:/app
       - ./logs:/app/logs
