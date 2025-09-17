@@ -5,6 +5,7 @@ from datetime import datetime
 import uuid
 import structlog
 from models import Todo, TodoCreate, TodoUpdate, TodoResponse
+from db import engine, Base
 from database import get_todos, create_todo, update_todo, delete_todo, get_todo_by_id
 from logging_config import get_logger, log_database_operation, log_business_logic
 from middleware import LoggingMiddleware, ErrorHandlingMiddleware
@@ -35,6 +36,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Auto-create tables if persistence is enabled
+if engine is not None:
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables ensured", engine_url=str(engine.url))
 
 # Log application startup
 logger.info("SpicyTodo API starting up", version="1.0.0")
