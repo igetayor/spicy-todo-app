@@ -21,6 +21,7 @@ services:
     volumes:
       - ./api/pyfast-api:/app
       - ./logs:/app/logs
+      - ./api/pyfast-api/data:/app/data
       - /app/venv
       - /app/__pycache__
     restart: unless-stopped
