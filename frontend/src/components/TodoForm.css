@@ -73,22 +73,36 @@
   box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
 }
 
-.priority-selector {
+.form-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.priority-selector,
+.due-date-selector,
+.reminder-selector {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.priority-label {
+.priority-label,
+.due-date-label,
+.reminder-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
   color: #374151;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
-.priority-select {
+.priority-select,
+.due-date-input,
+.reminder-input {
   padding: 0.5rem 0.75rem;
   border: 2px solid #e1e5e9;
   border-radius: 8px;
@@ -96,12 +110,35 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 120px;
 }
 
-.priority-select:focus {
+.due-date-input,
+.reminder-input {
+  font-family: inherit;
+}
+
+.priority-select:focus,
+.due-date-input:focus,
+.reminder-input:focus {
   outline: none;
   border-color: #ff6b6b;
   box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.reminder-selector {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @media (max-width: 768px) {
@@ -113,9 +150,24 @@
     justify-content: center;
   }
   
-  .priority-selector {
+  .form-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .priority-selector,
+  .due-date-selector,
+  .reminder-selector {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+  
+  .priority-select,
+  .due-date-input,
+  .reminder-input {
+    width: 100%;
+    min-width: auto;
   }
 }

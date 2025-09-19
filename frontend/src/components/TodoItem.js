@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edit2, Trash2, Check, X } from 'lucide-react';
+import { Edit2, Trash2, Check, X, Calendar, Clock } from 'lucide-react';
 import './TodoItem.css';
 
 const TodoItem = ({ todo, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
@@ -54,6 +54,40 @@ const TodoItem = ({ todo, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
     }
   };
 
+  const formatDueDate = (dueDateString) => {
+    if (!dueDateString) return null;
+    
+    const dueDate = new Date(dueDateString);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const diffInDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) {
+      return 'Today';
+    } else if (diffInDays === 1) {
+      return 'Tomorrow';
+    } else if (diffInDays < 0) {
+      return `${Math.abs(diffInDays)} day${Math.abs(diffInDays) === 1 ? '' : 's'} overdue`;
+    } else {
+      return dueDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
+  const getDueDateStatus = (dueDateString) => {
+    if (!dueDateString) return '';
+    
+    const dueDate = new Date(dueDateString);
+    const today = new Date();
+    const diffInDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays < 0) return 'overdue';
+    if (diffInDays === 0) return 'due-today';
+    if (diffInDays <= 3) return 'due-soon';
+    return '';
+  };
+
   return (
     <div className={`todo-item ${todo.completed ? 'completed' : ''}`}>
       <div className="todo-content">
@@ -96,6 +130,23 @@ const TodoItem = ({ todo, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
                   {todo.completed ? 'Completed' : 'Created'} {formatDate(todo.completed ? todo.updatedAt : todo.createdAt)}
                 </span>
               </div>
+              
+              {(todo.dueDate || todo.reminderTime) && (
+                <div className="todo-due-info">
+                  {todo.dueDate && (
+                    <div className={`due-date ${getDueDateStatus(todo.dueDate)}`}>
+                      <Calendar size={14} />
+                      <span>Due: {formatDueDate(todo.dueDate)}</span>
+                    </div>
+                  )}
+                  {todo.reminderTime && (
+                    <div className="reminder-time">
+                      <Clock size={14} />
+                      <span>{todo.reminderTime}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
