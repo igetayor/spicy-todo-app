@@ -230,6 +230,8 @@ async def get_todos_stats():
     Get todo statistics summary
     """
     try:
+        from datetime import date, timedelta
+        
         todos = get_todos()
         
         total = len(todos)
@@ -244,15 +246,74 @@ async def get_todos_stats():
             "low": len([todo for todo in todos if todo.priority == "low"])
         }
         
+        # Due date statistics
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        next_week = today + timedelta(days=7)
+        
+        overdue_count = len([
+            todo for todo in todos 
+            if not todo.completed and todo.due_date and todo.due_date < today
+        ])
+        
+        due_today_count = len([
+            todo for todo in todos 
+            if not todo.completed and todo.due_date and todo.due_date == today
+        ])
+        
+        upcoming_count = len([
+            todo for todo in todos 
+            if not todo.completed and todo.due_date and today < todo.due_date <= next_week
+        ])
+        
         return {
             "total": total,
             "active": active,
             "completed": completed,
             "completion_rate": completion_rate,
-            "priority_breakdown": priority_counts
+            "priority_breakdown": priority_counts,
+            "overdue_count": overdue_count,
+            "due_today_count": due_today_count,
+            "upcoming_count": upcoming_count
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
+
+@app.get("/api/todos/reminders")
+async def get_upcoming_reminders():
+    """
+    Get todos with upcoming reminders
+    """
+    try:
+        from datetime import datetime, timedelta
+        
+        todos = get_todos()
+        now = datetime.now()
+        
+        # Get todos with reminders in the next hour
+        upcoming_reminders = []
+        for todo in todos:
+            if (todo.due_date and todo.reminder_time and not todo.completed):
+                # Combine due date and reminder time
+                reminder_datetime = datetime.combine(todo.due_date, todo.reminder_time)
+                
+                # Check if reminder is within the next hour
+                if now <= reminder_datetime <= now + timedelta(hours=1):
+                    upcoming_reminders.append({
+                        "id": todo.id,
+                        "text": todo.text,
+                        "priority": todo.priority,
+                        "due_date": todo.due_date.isoformat(),
+                        "reminder_time": todo.reminder_time.isoformat(),
+                        "reminder_datetime": reminder_datetime.isoformat()
+                    })
+        
+        return {
+            "upcoming_reminders": upcoming_reminders,
+            "count": len(upcoming_reminders)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching reminders: {str(e)}")
 
 @app.delete("/api/todos/completed")
 async def clear_completed_todos():

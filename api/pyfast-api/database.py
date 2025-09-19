@@ -1,5 +1,5 @@
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date, time, timedelta
 import uuid
 import structlog
 from models import Todo, TodoCreate, TodoUpdate, Priority
@@ -29,11 +29,19 @@ def initialize_sample_data():
     
     logger.info("Initializing database with sample data")
     
+    # Calculate some sample dates
+    today = date.today()
+    tomorrow = today + timedelta(days=1)
+    next_week = today + timedelta(days=7)
+    yesterday = today - timedelta(days=1)
+    
     sample_todos = [
         {
             "text": "Learn React hooks and state management",
             "priority": Priority.HIGH,
             "completed": False,
+            "due_date": tomorrow,
+            "reminder_time": time(9, 0),  # 9:00 AM
             "created_at": datetime(2024, 1, 15, 10, 0, 0),
             "updated_at": datetime(2024, 1, 15, 10, 0, 0)
         },
@@ -41,6 +49,8 @@ def initialize_sample_data():
             "text": "Build a spicy todo application",
             "priority": Priority.HIGH,
             "completed": True,
+            "due_date": yesterday,
+            "reminder_time": time(14, 30),  # 2:30 PM
             "created_at": datetime(2024, 1, 14, 9, 30, 0),
             "updated_at": datetime(2024, 1, 15, 11, 45, 0)
         },
@@ -48,6 +58,8 @@ def initialize_sample_data():
             "text": "Add beautiful animations and transitions",
             "priority": Priority.MEDIUM,
             "completed": False,
+            "due_date": next_week,
+            "reminder_time": time(16, 0),  # 4:00 PM
             "created_at": datetime(2024, 1, 13, 14, 20, 0),
             "updated_at": datetime(2024, 1, 13, 14, 20, 0)
         },
@@ -55,6 +67,8 @@ def initialize_sample_data():
             "text": "Implement dark mode toggle",
             "priority": Priority.LOW,
             "completed": False,
+            "due_date": today + timedelta(days=3),
+            "reminder_time": time(10, 30),  # 10:30 AM
             "created_at": datetime(2024, 1, 12, 16, 45, 0),
             "updated_at": datetime(2024, 1, 12, 16, 45, 0)
         },
@@ -62,6 +76,8 @@ def initialize_sample_data():
             "text": "Write comprehensive tests",
             "priority": Priority.MEDIUM,
             "completed": False,
+            "due_date": today + timedelta(days=5),
+            "reminder_time": time(13, 0),  # 1:00 PM
             "created_at": datetime(2024, 1, 11, 11, 15, 0),
             "updated_at": datetime(2024, 1, 11, 11, 15, 0)
         },
@@ -69,6 +85,8 @@ def initialize_sample_data():
             "text": "Deploy to production",
             "priority": Priority.HIGH,
             "completed": True,
+            "due_date": yesterday,
+            "reminder_time": time(9, 0),  # 9:00 AM
             "created_at": datetime(2024, 1, 10, 8, 0, 0),
             "updated_at": datetime(2024, 1, 14, 15, 30, 0)
         },
@@ -76,6 +94,8 @@ def initialize_sample_data():
             "text": "Optimize performance and bundle size",
             "priority": Priority.MEDIUM,
             "completed": False,
+            "due_date": today + timedelta(days=2),
+            "reminder_time": time(15, 30),  # 3:30 PM
             "created_at": datetime(2024, 1, 9, 13, 30, 0),
             "updated_at": datetime(2024, 1, 9, 13, 30, 0)
         },
@@ -83,6 +103,8 @@ def initialize_sample_data():
             "text": "Add keyboard shortcuts for power users",
             "priority": Priority.LOW,
             "completed": False,
+            "due_date": today + timedelta(days=10),
+            "reminder_time": time(11, 0),  # 11:00 AM
             "created_at": datetime(2024, 1, 8, 10, 45, 0),
             "updated_at": datetime(2024, 1, 8, 10, 45, 0)
         }
