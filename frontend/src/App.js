@@ -4,6 +4,7 @@ import TodoForm from './components/TodoForm';
 import TodoFilter from './components/TodoFilter';
 import TodoStats from './components/TodoStats';
 import apiService from './services/api';
+import reminderService from './services/reminderService';
 import { logger, userLogger, componentLogger } from './utils/logger';
 import './App.css';
 
@@ -18,6 +19,14 @@ function App() {
   useEffect(() => {
     componentLogger.logComponentLifecycle('App', 'mounted');
     logger.info('SpicyTodo app initialized');
+    
+    // Clean up old reminders on app start
+    reminderService.cleanupOldReminders();
+    
+    // Cleanup reminder service on unmount
+    return () => {
+      reminderService.destroy();
+    };
   }, []);
 
   // Load todos from API on component mount
@@ -44,6 +53,9 @@ function App() {
         filter, 
         searchTerm 
       });
+      
+      // Update reminder service with current todos
+      reminderService.updateTodos(data);
     } catch (err) {
       const errorMsg = 'Failed to load todos. Please check if the API is running.';
       setError(errorMsg);

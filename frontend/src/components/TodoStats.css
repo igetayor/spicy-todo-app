@@ -131,9 +131,53 @@
   font-weight: 500;
 }
 
+/* Due Date Stats Styles */
+.due-date-stats {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.due-date-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.due-date-card {
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.due-date-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.due-date-card .stat-icon {
+  position: relative;
+}
+
+.due-date-card .stat-icon::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .due-date-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
   
   .priority-stats {
