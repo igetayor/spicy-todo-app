@@ -58,13 +58,18 @@ function App() {
   };
 
   // CRUD Operations
-  const addTodo = async (text, priority = 'medium') => {
+  const addTodo = async (text, priority = 'medium', dueDate = null, reminderTime = null) => {
     try {
       setLoading(true);
       setError(null);
       
-      userLogger.logUserAction('create_todo', { text, priority });
-      const newTodo = await apiService.createTodo({ text, priority });
+      userLogger.logUserAction('create_todo', { text, priority, dueDate, reminderTime });
+      const newTodo = await apiService.createTodo({ 
+        text, 
+        priority, 
+        dueDate: dueDate || null, 
+        reminderTime: reminderTime || null 
+      });
       setTodos([newTodo, ...todos]);
       
       logger.info('Todo created successfully', { 
