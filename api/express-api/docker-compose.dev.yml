@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  spicy-todo-express-api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: spicy-todo-express-api-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - USE_PERSISTENT_STORAGE=false
+      - LOG_LEVEL=debug
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - spicy-todo-network
+
+networks:
+  spicy-todo-network:
+    driver: bridge
