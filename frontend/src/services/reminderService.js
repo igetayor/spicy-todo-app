@@ -284,3 +284,5 @@ class ReminderService {
 const reminderService = new ReminderService();
 
 export default reminderService;
+
+
