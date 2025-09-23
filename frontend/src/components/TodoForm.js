@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { Plus, Zap } from 'lucide-react';
+import { Plus, Zap, Calendar, Clock } from 'lucide-react';
 import './TodoForm.css';
 
 const TodoForm = ({ onAddTodo }) => {
   const [text, setText] = useState('');
   const [priority, setPriority] = useState('medium');
+  const [dueDate, setDueDate] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (text.trim()) {
-      onAddTodo(text.trim(), priority);
+      onAddTodo(text.trim(), priority, dueDate, reminderTime);
       setText('');
       setPriority('medium');
+      setDueDate('');
+      setReminderTime('');
     }
   };
 
@@ -40,20 +44,51 @@ const TodoForm = ({ onAddTodo }) => {
           </button>
         </div>
         
-        <div className="priority-selector">
-          <label className="priority-label">
-            <Zap size={16} />
-            Priority:
-          </label>
-          <select 
-            value={priority} 
-            onChange={(e) => setPriority(e.target.value)}
-            className="priority-select"
-          >
-            <option value="low">🟢 Low</option>
-            <option value="medium">🟡 Medium</option>
-            <option value="high">🔴 High</option>
-          </select>
+        <div className="form-controls">
+          <div className="priority-selector">
+            <label className="priority-label">
+              <Zap size={16} />
+              Priority:
+            </label>
+            <select 
+              value={priority} 
+              onChange={(e) => setPriority(e.target.value)}
+              className="priority-select"
+            >
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+          
+          <div className="due-date-selector">
+            <label className="due-date-label">
+              <Calendar size={16} />
+              Due Date:
+            </label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="due-date-input"
+              min={new Date().toISOString().split('T')[0]}
+            />
+          </div>
+          
+          {dueDate && (
+            <div className="reminder-selector">
+              <label className="reminder-label">
+                <Clock size={16} />
+                Reminder:
+              </label>
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="reminder-input"
+              />
+            </div>
+          )}
         </div>
       </div>
     </form>

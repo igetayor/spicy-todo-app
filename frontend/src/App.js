@@ -4,6 +4,7 @@ import TodoForm from './components/TodoForm';
 import TodoFilter from './components/TodoFilter';
 import TodoStats from './components/TodoStats';
 import apiService from './services/api';
+import reminderService from './services/reminderService';
 import { logger, userLogger, componentLogger } from './utils/logger';
 import './App.css';
 
@@ -18,6 +19,14 @@ function App() {
   useEffect(() => {
     componentLogger.logComponentLifecycle('App', 'mounted');
     logger.info('SpicyTodo app initialized');
+    
+    // Clean up old reminders on app start
+    reminderService.cleanupOldReminders();
+    
+    // Cleanup reminder service on unmount
+    return () => {
+      reminderService.destroy();
+    };
   }, []);
 
   // Load todos from API on component mount
@@ -44,6 +53,9 @@ function App() {
         filter, 
         searchTerm 
       });
+      
+      // Update reminder service with current todos
+      reminderService.updateTodos(data);
     } catch (err) {
       const errorMsg = 'Failed to load todos. Please check if the API is running.';
       setError(errorMsg);
@@ -58,13 +70,18 @@ function App() {
   };
 
   // CRUD Operations
-  const addTodo = async (text, priority = 'medium') => {
+  const addTodo = async (text, priority = 'medium', dueDate = null, reminderTime = null) => {
     try {
       setLoading(true);
       setError(null);
       
-      userLogger.logUserAction('create_todo', { text, priority });
-      const newTodo = await apiService.createTodo({ text, priority });
+      userLogger.logUserAction('create_todo', { text, priority, dueDate, reminderTime });
+      const newTodo = await apiService.createTodo({ 
+        text, 
+        priority, 
+        dueDate: dueDate || null, 
+        reminderTime: reminderTime || null 
+      });
       setTodos([newTodo, ...todos]);
       
       logger.info('Todo created successfully', { 
