@@ -11,7 +11,38 @@ const {
   handleValidationError
 } = require('../middleware/errorHandler');
 
-// Get all todos with optional filtering and search
+/**
+ * @swagger
+ * /todos:
+ *   get:
+ *     summary: Get all todos
+ *     description: Retrieve all todos with optional filtering and search
+ *     tags: [Todos]
+ *     parameters:
+ *       - $ref: '#/components/parameters/Filter'
+ *       - $ref: '#/components/parameters/Search'
+ *     responses:
+ *       200:
+ *         description: List of todos retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Todo'
+ *       400:
+ *         description: Bad request - invalid query parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/', asyncHandler(async (req, res) => {
   const startTime = Date.now();
   
@@ -87,7 +118,44 @@ router.get('/:id', asyncHandler(async (req, res) => {
   }
 }));
 
-// Create new todo
+/**
+ * @swagger
+ * /todos:
+ *   post:
+ *     summary: Create a new todo
+ *     description: Create a new todo with optional due date and reminder
+ *     tags: [Todos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TodoCreate'
+ *           example:
+ *             text: "Learn Express.js and build amazing APIs"
+ *             priority: "high"
+ *             dueDate: "2024-12-31"
+ *             reminderTime: "10:00"
+ *     responses:
+ *       201:
+ *         description: Todo created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Todo'
+ *       400:
+ *         description: Bad request - validation failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post('/', asyncHandler(async (req, res) => {
   const startTime = Date.now();
   
@@ -297,7 +365,27 @@ router.delete('/completed', asyncHandler(async (req, res) => {
   }
 }));
 
-// Get todo statistics
+/**
+ * @swagger
+ * /todos/stats/summary:
+ *   get:
+ *     summary: Get todo statistics
+ *     description: Retrieve comprehensive statistics about todos
+ *     tags: [Statistics]
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TodoStats'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/stats/summary', asyncHandler(async (req, res) => {
   const startTime = Date.now();
   

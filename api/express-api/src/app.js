@@ -9,10 +9,13 @@ require('dotenv').config();
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
 const requestLogger = require('./middleware/requestLogger');
+const { specs, swaggerUi, swaggerOptions } = require('./middleware/swagger');
 
 // Import routes
 const todosRoutes = require('./routes/todos');
 const healthRoutes = require('./routes/health');
+const exportRoutes = require('./routes/export');
+const importRoutes = require('./routes/import');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -61,6 +64,8 @@ app.use(requestLogger);
 // Routes
 app.use('/api/todos', todosRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/export', exportRoutes);
+app.use('/api/import', importRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -71,45 +76,20 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       todos: '/api/todos',
-      docs: '/api/docs'
+      docs: '/api/docs',
+      export: '/api/export',
+      import: '/api/import'
     },
     timestamp: new Date().toISOString()
   });
 });
 
-// API documentation endpoint
-app.get('/api/docs', (req, res) => {
-  res.json({
-    title: 'SpicyTodo Express API Documentation',
-    version: '1.0.0',
-    description: 'RESTful API for managing todos with due dates and reminders',
-    baseUrl: `${req.protocol}://${req.get('host')}/api`,
-    endpoints: {
-      'GET /': 'API information',
-      'GET /health': 'Health check',
-      'GET /todos': 'Get all todos (supports ?filter=all|active|completed&search=term)',
-      'GET /todos/stats/summary': 'Get todo statistics',
-      'GET /todos/reminders': 'Get upcoming reminders',
-      'GET /todos/:id': 'Get todo by ID',
-      'POST /todos': 'Create new todo',
-      'PUT /todos/:id': 'Update todo',
-      'PATCH /todos/:id/toggle': 'Toggle todo completion',
-      'DELETE /todos/:id': 'Delete todo',
-      'DELETE /todos/completed': 'Delete all completed todos'
-    },
-    models: {
-      todo: {
-        id: 'string (UUID)',
-        text: 'string (1-500 characters)',
-        priority: 'string (low|medium|high)',
-        completed: 'boolean',
-        dueDate: 'string (ISO date, optional)',
-        reminderTime: 'string (HH:MM, optional)',
-        createdAt: 'string (ISO datetime)',
-        updatedAt: 'string (ISO datetime)'
-      }
-    }
-  });
+// Swagger API documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerOptions));
+
+// Legacy API documentation endpoint (redirects to Swagger)
+app.get('/api/documentation', (req, res) => {
+  res.redirect('/api/docs');
 });
 
 // 404 handler
