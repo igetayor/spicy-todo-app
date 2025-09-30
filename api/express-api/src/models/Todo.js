@@ -8,6 +8,8 @@ class Todo {
     this.completed = data.completed || false;
     this.dueDate = data.dueDate || null;
     this.reminderTime = data.reminderTime || null;
+    this.recurrenceRule = data.recurrenceRule || 'none'; // none | daily | weekly | monthly
+    this.snoozedUntil = data.snoozedUntil || null; // ISO datetime string
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || new Date().toISOString();
   }
@@ -21,6 +23,8 @@ class Todo {
       completed: this.completed,
       dueDate: this.dueDate,
       reminderTime: this.reminderTime,
+      recurrenceRule: this.recurrenceRule,
+      snoozedUntil: this.snoozedUntil,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
@@ -28,7 +32,7 @@ class Todo {
 
   // Update todo properties
   update(data) {
-    const allowedFields = ['text', 'priority', 'completed', 'dueDate', 'reminderTime'];
+    const allowedFields = ['text', 'priority', 'completed', 'dueDate', 'reminderTime', 'recurrenceRule', 'snoozedUntil'];
     
     allowedFields.forEach(field => {
       if (data[field] !== undefined) {
@@ -139,6 +143,17 @@ class Todo {
         errors.push('Reminder time must be in HH:MM format');
       }
     }
+
+    if (!['none', 'daily', 'weekly', 'monthly'].includes(this.recurrenceRule)) {
+      errors.push('Recurrence rule must be one of none, daily, weekly, monthly');
+    }
+
+    if (this.snoozedUntil) {
+      const snoozeDate = new Date(this.snoozedUntil);
+      if (isNaN(snoozeDate.getTime())) {
+        errors.push('Snoozed until must be a valid ISO datetime');
+      }
+    }
     
     return {
       isValid: errors.length === 0,
@@ -223,3 +238,4 @@ class Todo {
 }
 
 module.exports = Todo;
+

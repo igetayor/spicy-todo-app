@@ -78,6 +78,8 @@ class Database {
           completed BOOLEAN NOT NULL DEFAULT 0,
           due_date TEXT,
           reminder_time TEXT,
+          recurrence_rule TEXT DEFAULT 'none',
+          snoozed_until TEXT,
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL
         )
@@ -181,6 +183,8 @@ class Database {
             completed: Boolean(row.completed),
             dueDate: row.due_date,
             reminderTime: row.reminder_time,
+            recurrenceRule: row.recurrence_rule || 'none',
+            snoozedUntil: row.snoozed_until || null,
             createdAt: row.created_at,
             updatedAt: row.updated_at
           }));
@@ -232,6 +236,8 @@ class Database {
             completed: Boolean(row.completed),
             dueDate: row.due_date,
             reminderTime: row.reminder_time,
+            recurrenceRule: row.recurrence_rule || 'none',
+            snoozedUntil: row.snoozed_until || null,
             createdAt: row.created_at,
             updatedAt: row.updated_at
           });
@@ -279,8 +285,8 @@ class Database {
   async createTodoInSQLite(todo) {
     return new Promise((resolve, reject) => {
       const sql = `
-        INSERT INTO todos (id, text, priority, completed, due_date, reminder_time, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO todos (id, text, priority, completed, due_date, reminder_time, recurrence_rule, snoozed_until, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
       
       const params = [
@@ -290,6 +296,8 @@ class Database {
         todo.completed ? 1 : 0,
         todo.dueDate,
         todo.reminderTime,
+        todo.recurrenceRule,
+        todo.snoozedUntil,
         todo.createdAt,
         todo.updatedAt
       ];
@@ -355,7 +363,7 @@ class Database {
         // Update in database
         const sql = `
           UPDATE todos 
-          SET text = ?, priority = ?, completed = ?, due_date = ?, reminder_time = ?, updated_at = ?
+          SET text = ?, priority = ?, completed = ?, due_date = ?, reminder_time = ?, recurrence_rule = ?, snoozed_until = ?, updated_at = ?
           WHERE id = ?
         `;
         
@@ -365,6 +373,8 @@ class Database {
           updatedTodo.completed ? 1 : 0,
           updatedTodo.dueDate,
           updatedTodo.reminderTime,
+          updatedTodo.recurrenceRule,
+          updatedTodo.snoozedUntil,
           updatedTodo.updatedAt,
           id
         ];
@@ -578,3 +588,4 @@ class Database {
 const database = new Database();
 
 module.exports = database;
+

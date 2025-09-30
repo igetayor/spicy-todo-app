@@ -10,6 +10,60 @@ const {
   asyncHandler,
   handleValidationError
 } = require('../middleware/errorHandler');
+// Snooze a todo until a specific ISO datetime
+router.post('/:id/snooze', asyncHandler(async (req, res) => {
+  const startTime = Date.now();
+  const { error: idError, value: id } = validateId(req.params.id);
+  if (idError) {
+    return res.status(400).json({
+      error: 'Bad Request',
+      message: idError.details.map(detail => detail.message).join(', '),
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  const { snoozedUntil } = req.body || {};
+  if (!snoozedUntil) {
+    return res.status(400).json({
+      error: 'Bad Request',
+      message: 'snoozedUntil is required',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  const parsed = new Date(snoozedUntil);
+  if (isNaN(parsed.getTime())) {
+    return res.status(400).json({
+      error: 'Bad Request',
+      message: 'snoozedUntil must be a valid ISO datetime',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  try {
+    const updatedTodo = await database.updateTodo(id, { snoozedUntil });
+    const duration = Date.now() - startTime;
+    logger.logBusinessLogic('snooze_todo', { id, snoozedUntil });
+    logger.logApiRequest('POST', `/api/todos/${id}/snooze`, 200, duration);
+    res.json(updatedTodo);
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    if (error.message.includes('not found')) {
+      logger.logApiRequest('POST', `/api/todos/${id}/snooze`, 404, duration);
+      return res.status(404).json({
+        error: 'Not Found',
+        message: `Todo with id ${id} not found`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    logger.logApiRequest('POST', `/api/todos/${id}/snooze`, 500, duration, error);
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Failed to snooze todo',
+      timestamp: new Date().toISOString()
+    });
+  }
+}));
 
 /**
  * @swagger
@@ -271,7 +325,35 @@ router.patch('/:id/toggle', asyncHandler(async (req, res) => {
     }
 
     // Toggle completion status
-    const updatedTodo = await database.updateTodo(id, { completed: !todo.completed });
+    const updatedTodo = await database.updateTodo(id, { completed: !todo.completed, snoozedUntil: null });
+
+    // If marking complete and recurrence is set, spawn next occurrence
+    if (!todo.completed && updatedTodo.completed && updatedTodo.recurrenceRule && updatedTodo.recurrenceRule !== 'none') {
+      try {
+        const nextDue = (() => {
+          if (!updatedTodo.dueDate) return null;
+          const d = new Date(updatedTodo.dueDate);
+          if (updatedTodo.recurrenceRule === 'daily') d.setDate(d.getDate() + 1);
+          else if (updatedTodo.recurrenceRule === 'weekly') d.setDate(d.getDate() + 7);
+          else if (updatedTodo.recurrenceRule === 'monthly') d.setMonth(d.getMonth() + 1);
+          return d.toISOString().split('T')[0];
+        })();
+
+        if (nextDue) {
+          await database.createTodo({
+            text: updatedTodo.text,
+            priority: updatedTodo.priority,
+            completed: false,
+            dueDate: nextDue,
+            reminderTime: updatedTodo.reminderTime,
+            recurrenceRule: updatedTodo.recurrenceRule,
+            snoozedUntil: null
+          });
+        }
+      } catch (spawnErr) {
+        // Log and continue without failing toggle
+      }
+    }
     const duration = Date.now() - startTime;
     
     logger.logBusinessLogic('toggle_todo', { id, completed: updatedTodo.completed });
