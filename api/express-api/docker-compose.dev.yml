@@ -30,3 +30,4 @@ services:
 networks:
   spicy-todo-network:
     driver: bridge
+
