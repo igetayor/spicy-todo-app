@@ -55,3 +55,4 @@ else
     echo "📝 Check logs with: docker-compose logs"
     exit 1
 fi
+
