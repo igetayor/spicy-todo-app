@@ -23,7 +23,9 @@ const todoBaseSchema = Joi.object({
   priority: prioritySchema,
   completed: Joi.boolean().default(false),
   dueDate: dateSchema.allow(null).optional(),
-  reminderTime: timeSchema.allow(null).optional()
+  reminderTime: timeSchema.allow(null).optional(),
+  recurrenceRule: Joi.string().valid('none', 'daily', 'weekly', 'monthly').default('none'),
+  snoozedUntil: Joi.string().isoDate().allow(null).optional()
 }).custom((value, helpers) => {
   // Custom validation: reminder time requires due date
   if (value.reminderTime && !value.dueDate) {
@@ -53,7 +55,9 @@ const todoUpdateSchema = Joi.object({
   priority: prioritySchema.optional(),
   completed: Joi.boolean().optional(),
   dueDate: dateSchema.allow(null).optional(),
-  reminderTime: timeSchema.allow(null).optional()
+  reminderTime: timeSchema.allow(null).optional(),
+  recurrenceRule: Joi.string().valid('none', 'daily', 'weekly', 'monthly').optional(),
+  snoozedUntil: Joi.string().isoDate().allow(null).optional()
 }).custom((value, helpers) => {
   // Custom validation: reminder time requires due date
   if (value.reminderTime && !value.dueDate) {
@@ -157,3 +161,4 @@ module.exports = {
   validateStatsResponse: (data) => statsResponseSchema.validate(data),
   validateRemindersResponse: (data) => remindersResponseSchema.validate(data)
 };
+
