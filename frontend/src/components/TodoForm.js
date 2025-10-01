@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Zap, Calendar, Clock } from 'lucide-react';
+import { Plus, Zap, Calendar, Clock, Repeat } from 'lucide-react';
 import './TodoForm.css';
 
 const TodoForm = ({ onAddTodo }) => {
@@ -7,15 +7,17 @@ const TodoForm = ({ onAddTodo }) => {
   const [priority, setPriority] = useState('medium');
   const [dueDate, setDueDate] = useState('');
   const [reminderTime, setReminderTime] = useState('');
+  const [recurrenceRule, setRecurrenceRule] = useState('none');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (text.trim()) {
-      onAddTodo(text.trim(), priority, dueDate, reminderTime);
+      onAddTodo(text.trim(), priority, dueDate, reminderTime, recurrenceRule);
       setText('');
       setPriority('medium');
       setDueDate('');
       setReminderTime('');
+      setRecurrenceRule('none');
     }
   };
 
@@ -89,6 +91,23 @@ const TodoForm = ({ onAddTodo }) => {
               />
             </div>
           )}
+
+          <div className="recurrence-selector">
+            <label className="recurrence-label">
+              <Repeat size={16} />
+              Repeat:
+            </label>
+            <select 
+              value={recurrenceRule}
+              onChange={(e) => setRecurrenceRule(e.target.value)}
+              className="recurrence-select"
+            >
+              <option value="none">No repeat</option>
+              <option value="daily">Every day</option>
+              <option value="weekly">Every week</option>
+              <option value="monthly">Every month</option>
+            </select>
+          </div>
         </div>
       </div>
     </form>
