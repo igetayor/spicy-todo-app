@@ -70,17 +70,18 @@ function App() {
   };
 
   // CRUD Operations
-  const addTodo = async (text, priority = 'medium', dueDate = null, reminderTime = null) => {
+  const addTodo = async (text, priority = 'medium', dueDate = null, reminderTime = null, recurrenceRule = 'none') => {
     try {
       setLoading(true);
       setError(null);
       
-      userLogger.logUserAction('create_todo', { text, priority, dueDate, reminderTime });
+      userLogger.logUserAction('create_todo', { text, priority, dueDate, reminderTime, recurrenceRule });
       const newTodo = await apiService.createTodo({ 
         text, 
         priority, 
         dueDate: dueDate || null, 
-        reminderTime: reminderTime || null 
+        reminderTime: reminderTime || null,
+        recurrenceRule
       });
       setTodos([newTodo, ...todos]);
       
@@ -147,6 +148,22 @@ function App() {
     }
   };
 
+  const snoozeTodo = async (todo) => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Default snooze: 1 hour from now
+      const snoozeUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      const updated = await apiService.snoozeTodo(todo.id, snoozeUntil);
+      setTodos(todos.map(t => t.id === todo.id ? updated : t));
+    } catch (err) {
+      setError('Failed to snooze todo');
+      console.error('Error snoozing todo:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearCompleted = async () => {
     try {
       setLoading(true);
@@ -200,6 +217,7 @@ function App() {
             onToggleTodo={toggleTodo}
             onUpdateTodo={updateTodo}
             onDeleteTodo={deleteTodo}
+            onSnooze={snoozeTodo}
             loading={loading}
           />
         </div>
