@@ -3,7 +3,7 @@ import TodoItem from './TodoItem';
 import EmptyState from './EmptyState';
 import './TodoList.css';
 
-const TodoList = ({ todos, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
+const TodoList = ({ todos, onToggleTodo, onUpdateTodo, onDeleteTodo, onSnooze }) => {
   if (todos.length === 0) {
     return <EmptyState />;
   }
@@ -19,6 +19,7 @@ const TodoList = ({ todos, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
             onToggleTodo={onToggleTodo}
             onUpdateTodo={onUpdateTodo}
             onDeleteTodo={onDeleteTodo}
+            onSnooze={onSnooze}
           />
         ))}
       </div>
