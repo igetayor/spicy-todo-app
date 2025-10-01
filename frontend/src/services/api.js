@@ -106,6 +106,13 @@ class ApiService {
     });
   }
 
+  async snoozeTodo(id, snoozedUntil) {
+    return this.request(`/api/todos/${id}/snooze`, {
+      method: 'POST',
+      body: JSON.stringify({ snoozedUntil })
+    });
+  }
+
   async getTodoStats() {
     return this.request('/api/todos/stats/summary');
   }
