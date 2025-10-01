@@ -58,6 +58,13 @@ class ReminderService {
     
     todos.forEach(todo => {
       if (todo.dueDate && todo.reminderTime && !todo.completed) {
+        // Respect snooze: skip reminders before snoozedUntil
+        if (todo.snoozedUntil) {
+          const snoozeUntil = new Date(todo.snoozedUntil);
+          if (now < snoozeUntil) {
+            return;
+          }
+        }
         const reminderDateTime = new Date(`${todo.dueDate}T${todo.reminderTime}`);
         const timeDiff = reminderDateTime - now;
         
