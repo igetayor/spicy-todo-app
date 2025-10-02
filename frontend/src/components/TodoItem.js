@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Edit2, Trash2, Check, X, Calendar, Clock } from 'lucide-react';
+import { Edit2, Trash2, Check, X, Calendar, Clock, AlarmClockCheck, Repeat } from 'lucide-react';
 import './TodoItem.css';
 
-const TodoItem = ({ todo, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
+const TodoItem = ({ todo, onToggleTodo, onUpdateTodo, onDeleteTodo, onSnooze }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(todo.text);
 
@@ -145,6 +145,18 @@ const TodoItem = ({ todo, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
                       <span>{todo.reminderTime}</span>
                     </div>
                   )}
+                  {todo.recurrenceRule && todo.recurrenceRule !== 'none' && (
+                    <div className="recurrence-info">
+                      <Repeat size={14} />
+                      <span>{todo.recurrenceRule}</span>
+                    </div>
+                  )}
+                  {todo.snoozedUntil && (
+                    <div className="snoozed-info">
+                      <AlarmClockCheck size={14} />
+                      <span>Snoozed</span>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -156,6 +168,11 @@ const TodoItem = ({ todo, onToggleTodo, onUpdateTodo, onDeleteTodo }) => {
             <button onClick={handleEdit} className="action-button edit-button">
               <Edit2 size={16} />
             </button>
+            {!todo.completed && (
+              <button onClick={() => onSnooze && onSnooze(todo)} className="action-button">
+                <AlarmClockCheck size={16} />
+              </button>
+            )}
             <button onClick={() => onDeleteTodo(todo.id)} className="action-button delete-button">
               <Trash2 size={16} />
             </button>
