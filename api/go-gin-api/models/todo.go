@@ -10,31 +10,50 @@ const (
 	PriorityHigh   Priority = "high"
 )
 
+type RecurrenceRule string
+
+const (
+	RecurrenceNone    RecurrenceRule = "none"
+	RecurrenceDaily   RecurrenceRule = "daily"
+	RecurrenceWeekly  RecurrenceRule = "weekly"
+	RecurrenceMonthly RecurrenceRule = "monthly"
+)
+
 type Todo struct {
-	ID           string    `json:"id"`
-	Text         string    `json:"text" binding:"required,min=1,max=500"`
-	Priority     Priority  `json:"priority"`
-	Completed    bool      `json:"completed"`
-	DueDate      *string   `json:"dueDate,omitempty"`
-	ReminderTime *string   `json:"reminderTime,omitempty"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	ID             string         `json:"id"`
+	Text           string         `json:"text" binding:"required,min=1,max=500"`
+	Priority       Priority       `json:"priority"`
+	Completed      bool           `json:"completed"`
+	DueDate        *string        `json:"dueDate,omitempty"`
+	ReminderTime   *string        `json:"reminderTime,omitempty"`
+	RecurrenceRule RecurrenceRule `json:"recurrenceRule"`
+	SnoozedUntil   *time.Time     `json:"snoozedUntil,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	Category       *string        `json:"category,omitempty"`
+	CreatedAt      time.Time      `json:"createdAt"`
+	UpdatedAt      time.Time      `json:"updatedAt"`
 }
 
 type TodoCreate struct {
-	Text         string   `json:"text" binding:"required,min=1,max=500"`
-	Priority     Priority `json:"priority"`
-	Completed    bool     `json:"completed"`
-	DueDate      *string  `json:"dueDate,omitempty"`
-	ReminderTime *string  `json:"reminderTime,omitempty"`
+	Text           string         `json:"text" binding:"required,min=1,max=500"`
+	Priority       Priority       `json:"priority"`
+	Completed      bool           `json:"completed"`
+	DueDate        *string        `json:"dueDate,omitempty"`
+	ReminderTime   *string        `json:"reminderTime,omitempty"`
+	RecurrenceRule RecurrenceRule `json:"recurrenceRule"`
+	Tags           []string       `json:"tags,omitempty"`
+	Category       *string        `json:"category,omitempty"`
 }
 
 type TodoUpdate struct {
-	Text         *string   `json:"text,omitempty" binding:"omitempty,min=1,max=500"`
-	Priority     *Priority `json:"priority,omitempty"`
-	Completed    *bool     `json:"completed,omitempty"`
-	DueDate      *string   `json:"dueDate,omitempty"`
-	ReminderTime *string   `json:"reminderTime,omitempty"`
+	Text           *string         `json:"text,omitempty" binding:"omitempty,min=1,max=500"`
+	Priority       *Priority       `json:"priority,omitempty"`
+	Completed      *bool           `json:"completed,omitempty"`
+	DueDate        *string         `json:"dueDate,omitempty"`
+	ReminderTime   *string         `json:"reminderTime,omitempty"`
+	RecurrenceRule *RecurrenceRule `json:"recurrenceRule,omitempty"`
+	Tags           []string        `json:"tags,omitempty"`
+	Category       *string         `json:"category,omitempty"`
 }
 
 type TodoStats struct {

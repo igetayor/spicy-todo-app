@@ -26,14 +26,35 @@ func SetupRoutes(router *gin.Engine, handler *handlers.TodoHandler) {
 	// API routes
 	api := router.Group("/api")
 	{
+		// Core CRUD operations
 		api.GET("/todos", handler.GetTodos)
 		api.POST("/todos", handler.CreateTodo)
 		api.GET("/todos/:id", handler.GetTodoByID)
 		api.PUT("/todos/:id", handler.UpdateTodo)
 		api.DELETE("/todos/:id", handler.DeleteTodo)
 		api.PATCH("/todos/:id/toggle", handler.ToggleTodo)
+		
+		// Snooze operations
+		api.PATCH("/todos/:id/snooze", handler.SnoozeTodo)
+		api.PATCH("/todos/:id/unsnooze", handler.UnsnoozeTodo)
+		
+		// Statistics and reminders
 		api.GET("/todos/stats/summary", handler.GetStats)
+		api.GET("/todos/reminders", handler.GetUpcomingReminders)
+		
+		// Tag and category operations
+		api.GET("/todos/tags/:tag", handler.GetByTag)
+		api.GET("/todos/category/:category", handler.GetByCategory)
+		api.GET("/todos/tags", handler.GetAllTags)
+		api.GET("/todos/categories", handler.GetAllCategories)
+		
+		// Bulk operations
+		api.POST("/todos/bulk", handler.BulkOperation)
 		api.DELETE("/todos/completed", handler.ClearCompleted)
+		
+		// Import/Export
+		api.GET("/export/todos", handler.ExportTodos)
+		api.POST("/import/todos", handler.ImportTodos)
 	}
 }
 
