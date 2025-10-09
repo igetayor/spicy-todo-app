@@ -25,8 +25,15 @@ func (s *TodoService) GetAll(filter, search, priority string) []*models.Todo {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	now := time.Now()
 	result := make([]*models.Todo, 0)
+	
 	for _, todo := range s.todos {
+		// Skip snoozed todos
+		if todo.SnoozedUntil != nil && todo.SnoozedUntil.After(now) {
+			continue
+		}
+		
 		// Apply filters
 		if filter == "active" && todo.Completed {
 			continue
@@ -62,17 +69,25 @@ func (s *TodoService) Create(input models.TodoCreate) *models.Todo {
 	if input.Priority == "" {
 		input.Priority = models.PriorityMedium
 	}
+	
+	// Set default recurrence
+	if input.RecurrenceRule == "" {
+		input.RecurrenceRule = models.RecurrenceNone
+	}
 
 	now := time.Now()
 	todo := &models.Todo{
-		ID:           uuid.New().String(),
-		Text:         input.Text,
-		Priority:     input.Priority,
-		Completed:    input.Completed,
-		DueDate:      input.DueDate,
-		ReminderTime: input.ReminderTime,
-		CreatedAt:    now,
-		UpdatedAt:    now,
+		ID:             uuid.New().String(),
+		Text:           input.Text,
+		Priority:       input.Priority,
+		Completed:      input.Completed,
+		DueDate:        input.DueDate,
+		ReminderTime:   input.ReminderTime,
+		RecurrenceRule: input.RecurrenceRule,
+		Tags:           input.Tags,
+		Category:       input.Category,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 
 	s.todos[todo.ID] = todo
@@ -103,6 +118,15 @@ func (s *TodoService) Update(id string, input models.TodoUpdate) (*models.Todo, 
 	}
 	if input.ReminderTime != nil {
 		todo.ReminderTime = input.ReminderTime
+	}
+	if input.RecurrenceRule != nil {
+		todo.RecurrenceRule = *input.RecurrenceRule
+	}
+	if input.Tags != nil {
+		todo.Tags = input.Tags
+	}
+	if input.Category != nil {
+		todo.Category = input.Category
 	}
 
 	todo.UpdatedAt = time.Now()
