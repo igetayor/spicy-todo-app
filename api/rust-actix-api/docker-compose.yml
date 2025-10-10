@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  spicy-todo-rust-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spicy-todo-rust-api
+    ports:
+      - "8000:8000"
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
