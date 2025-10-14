@@ -1,2 +1,5 @@
 node_modules
 frontend/coverage
+
+# Spring Boot build output
+api/spring-boot-api/target/

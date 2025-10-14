@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Documentation
+README.md
+*.md
+
+# IDE
+.idea
+.vscode
+.eclipse
+.settings
+*.iml
+*.swp
+*.swo
+*~
+
+# Build artifacts
+target/
+*.jar
+*.war
+*.ear
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.mvn
+mvnw
+mvnw.cmd
+

@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Documentation
+README.md
+*.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Ruby
+*.gem
+*.rbc
+.bundle
+vendor/bundle
+
+# RSpec
+spec/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
