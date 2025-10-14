@@ -73,30 +73,53 @@ http://localhost:8000/api
 - `GET /` - API information
 - `GET /health` - Health check
 
-#### Todos
+#### Core CRUD Operations
 - `GET /api/todos` - Get all todos (supports filtering and search)
 - `POST /api/todos` - Create new todo
 - `GET /api/todos/:id` - Get todo by ID
 - `PUT /api/todos/:id` - Update todo
 - `PATCH /api/todos/:id/toggle` - Toggle todo completion
 - `DELETE /api/todos/:id` - Delete todo
-- `DELETE /api/todos/completed` - Delete all completed todos
 
-#### Statistics & Analytics
+#### ⏰ Snooze Operations (NEW!)
+- `PATCH /api/todos/:id/snooze` - Snooze todo until specific time
+- `PATCH /api/todos/:id/unsnooze` - Remove snooze from todo
+
+#### 🔔 Reminders & Statistics
 - `GET /api/todos/stats/summary` - Get todo statistics
+- `GET /api/todos/reminders` - Get upcoming reminders (next 24h)
+
+#### 🏷️ Tags & Categories (NEW!)
+- `GET /api/todos/tags/:tag` - Get todos by tag
+- `GET /api/todos/category/:category` - Get todos by category
+- `GET /api/todos/tags` - Get all unique tags
+- `GET /api/todos/categories` - Get all categories
+
+#### 📦 Bulk Operations (NEW!)
+- `POST /api/todos/bulk` - Bulk operations (complete, delete, updatePriority)
+- `DELETE /api/todos/completed` - Clear all completed todos
+
+#### 📤 Import/Export (NEW!)
+- `GET /api/export/todos` - Export todos to JSON
+- `POST /api/import/todos` - Import todos from JSON
+
+**Total: 23 Endpoints** (was 11)
 
 ### Request/Response Examples
 
-#### Create Todo
+#### Create Todo (Enhanced)
 ```bash
 POST /api/todos
 Content-Type: application/json
 
 {
-  "text": "Learn Go programming",
+  "text": "Weekly team standup",
   "priority": "high",
   "dueDate": "2024-12-31",
-  "reminderTime": "10:00"
+  "reminderTime": "10:00",
+  "recurrenceRule": "weekly",
+  "tags": ["work", "meeting"],
+  "category": "Work"
 }
 ```
 
@@ -104,11 +127,15 @@ Content-Type: application/json
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "text": "Learn Go programming",
+  "text": "Weekly team standup",
   "priority": "high",
   "completed": false,
   "dueDate": "2024-12-31",
   "reminderTime": "10:00",
+  "recurrenceRule": "weekly",
+  "tags": ["work", "meeting"],
+  "category": "Work",
+  "snoozedUntil": null,
   "createdAt": "2024-01-15T10:00:00Z",
   "updatedAt": "2024-01-15T10:00:00Z"
 }
