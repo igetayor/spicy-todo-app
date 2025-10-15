@@ -1,5 +1,9 @@
 mod handlers;
+#[cfg(test)]
+mod handlers_test;
 mod models;
+#[cfg(test)]
+mod integration_test;
 mod routes;
 mod service;
 
